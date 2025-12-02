@@ -14,13 +14,26 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
 ].filter(Boolean) as string[];
 
+// Also allow Vercel preview deployments
+const isAllowedOrigin = (origin: string): boolean => {
+  // Check exact matches
+  if (allowedOrigins.includes(origin)) return true;
+  
+  // Allow all Vercel preview URLs for this project
+  if (origin.includes('readmd-dev-frontend') && origin.endsWith('.vercel.app')) {
+    return true;
+  }
+  
+  return false;
+};
+
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (mobile apps, Postman, etc.)
       if (!origin) return callback(null, true);
       
-      if (allowedOrigins.includes(origin)) {
+      if (isAllowedOrigin(origin)) {
         callback(null, true);
       } else {
         console.log('CORS blocked origin:', origin);
